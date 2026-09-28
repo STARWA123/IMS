@@ -1,0 +1,30 @@
+node_modules/
+src/generated/prisma/
+.next/
+.codex-remote-attachments/
+*.tsbuildinfo
+*.log
+*.db
+.env
+.env.*
+!.env.example
+
+# OfferTrack local data stays in the project, but runtime databases are not committed.
+data/*.db
+data/*.db-journal
+data/*.db-shm
+data/*.db-wal
+data/.operations/
+backups/
+outputs/
+
+# Project-local package-manager cache.
+.npm-cache/
+.node-gyp/
+.npm-global/
+.corepack/
+.tools/
+.tmp/
+
+# One-off private data migration kept only on this workstation.
+scripts/import-2026-autumn-recruitment.ts
