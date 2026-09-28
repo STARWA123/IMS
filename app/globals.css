@@ -197,7 +197,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .jobs-toolbar > div:first-child { display: grid; grid-template-columns: auto auto; align-items: baseline; column-gap: 10px; }
 .jobs-toolbar .eyebrow { grid-column: 1 / -1; }
 .jobs-toolbar h2 { margin: 4px 0 0; font-size: 18px; letter-spacing: -.02em; }
-.jobs-toolbar-actions { display: flex; align-items: center; gap: 10px; }
+.jobs-toolbar-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+.jobs-view-switch { display: flex; align-items: center; height: 38px; border: 1px solid var(--border); border-radius: 9px; background: #f8fafc; padding: 3px; }
+.jobs-view-switch button { height: 30px; border: 0; border-radius: 6px; background: transparent; padding: 0 11px; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 600; }
+.jobs-view-switch button[aria-pressed="true"] { background: #fff; box-shadow: 0 1px 3px rgba(15,23,42,.12); color: var(--primary); }
 .job-search { width: min(310px, 38vw); height: 38px; display: flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: 9px; background: #fff; padding: 0 10px; color: var(--muted-soft); }
 .job-search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
 .job-search input { width: 100%; min-width: 0; border: 0; background: transparent; color: var(--foreground); outline: none; font-size: 13px; }
@@ -217,6 +220,24 @@ tbody tr:last-child td { border-bottom: 0; }
 .row-actions a:hover, .row-actions button:hover { background: #eff6ff; }
 .row-actions .row-delete { color: var(--danger-dark); }
 .row-actions .row-delete:hover { background: var(--danger-soft); }
+.company-list { display: grid; gap: 10px; background: #f8fafc; padding: 14px; }
+.company-row { overflow: hidden; border: 1px solid var(--border); border-radius: 11px; background: #fff; }
+.company-summary { width: 100%; display: grid; grid-template-columns: 18px minmax(220px, 1fr) minmax(70px, .28fr) minmax(70px, .28fr) minmax(120px, .45fr); align-items: center; gap: 14px; border: 0; background: #fff; padding: 16px 18px; color: var(--foreground); cursor: pointer; text-align: left; }
+.company-summary:hover { background: #fbfdff; }
+.company-summary:focus-visible { position: relative; z-index: 1; outline: 2px solid var(--primary); outline-offset: -2px; }
+.company-chevron { color: var(--muted-soft); font-size: 24px; line-height: 1; transform: rotate(0deg); transition: transform .15s ease; }
+.company-summary[aria-expanded="true"] .company-chevron { transform: rotate(90deg); }
+.company-summary-name { min-width: 0; display: grid; gap: 5px; }
+.company-summary-name > strong { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.company-summary-name > small, .company-summary-metric small, .company-summary-stage small { color: var(--muted-soft); font-size: 10px; font-weight: 500; }
+.company-summary-metric, .company-summary-stage { display: grid; gap: 4px; }
+.company-summary-metric strong { font-size: 16px; }
+.company-summary-stage strong { color: var(--primary); font-size: 13px; }
+.company-summary-stage strong[data-all-rejected="true"] { color: var(--danger-dark); }
+.company-jobs { border-top: 1px solid var(--border); background: #fbfdff; padding-left: 32px; }
+.company-jobs table { background: #fff; }
+.company-jobs th { background: #f8fafc; }
+.company-date-compact { display: none; }
 .dialog-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: rgba(15, 23, 42, .4); backdrop-filter: blur(6px); animation: fade-in .14s ease-out; }
 .dialog-card { width: min(460px, 100%); max-height: min(760px, calc(100vh - 40px)); overflow-y: auto; border: 1px solid rgba(255,255,255,.7); border-radius: 17px; background: var(--card); box-shadow: 0 30px 90px rgba(15,23,42,.24); outline: none; padding: 22px; animation: dialog-enter .18s ease-out; }
 .dialog-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
@@ -455,6 +476,8 @@ tbody tr:last-child td { border-bottom: 0; }
   .delete-counts { grid-template-columns: 1fr; }
   .jobs-toolbar { align-items: stretch; flex-direction: column; }
   .jobs-toolbar-actions { align-items: stretch; flex-direction: column; }
+  .jobs-view-switch { width: 100%; }
+  .jobs-view-switch button { flex: 1; }
   .job-search { width: 100%; }
   .import-job-button, .add-job-button { width: 100%; }
   .job-import-dialog { width: 100%; }
@@ -485,6 +508,16 @@ tbody tr:last-child td { border-bottom: 0; }
   .auth-page { padding: 16px; }
   .auth-card { border-radius: 16px; padding: 26px 22px; }
   .account-create-form { grid-template-columns: 1fr; }
+  .company-list { padding: 10px; }
+  .company-summary { grid-template-columns: 16px minmax(0, 1fr) auto auto; grid-template-areas: "chevron name jobs active" "chevron stage stage stage"; gap: 10px; padding: 14px 12px; }
+  .company-chevron { grid-area: chevron; }
+  .company-summary-name { grid-area: name; }
+  .company-summary-metric:nth-of-type(3) { grid-area: jobs; }
+  .company-summary-metric:nth-of-type(4) { grid-area: active; }
+  .company-summary-stage { grid-area: stage; display: flex; align-items: baseline; gap: 7px; }
+  .company-jobs { padding-left: 0; }
+  .company-date-full { display: none; }
+  .company-date-compact { display: inline; }
 }
 
 @media (prefers-reduced-motion: reduce) {

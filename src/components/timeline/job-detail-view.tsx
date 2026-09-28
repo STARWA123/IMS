@@ -81,11 +81,13 @@ function DeleteTimelineDialog({
 export function JobDetailView({
   job,
   workspaceId,
+  backLabel = "返回岗位列表",
   onBack,
   onChanged,
 }: {
   job: JobItem;
   workspaceId: string;
+  backLabel?: string;
   onBack: () => void;
   onChanged: () => void;
 }): ReactNode {
@@ -175,7 +177,7 @@ export function JobDetailView({
 
   return (
     <div className="job-detail-view">
-      <button className="back-button" onClick={onBack} type="button">← 返回岗位列表</button>
+      <button className="back-button" onClick={onBack} type="button">← {backLabel}</button>
       <section className="job-detail-header">
         <div>
           <span className="eyebrow">{job.companyName}</span>

@@ -94,6 +94,33 @@ async function run(): Promise<void> {
       (await db.job.count({ where: { id: first.job.id } })) === 0,
       "删除操作应删除指定 Job。",
     );
+    assert(
+      (await db.company.count({ where: { id: first.job.companyId } })) === 0,
+      "删除公司的最后一个 Job 后应清理空 Company。",
+    );
+
+    const sharedFirst = await createJob(workspace.id, {
+      companyName: "共享公司",
+      jobName: "岗位一",
+      baseLocation: "深圳",
+    });
+    const sharedSecond = await createJob(workspace.id, {
+      companyName: "共享公司",
+      jobName: "岗位二",
+      baseLocation: "广州",
+    });
+    assert(sharedFirst.job.companyId === sharedSecond.job.companyId, "同名公司应复用 Company。");
+    await deleteJob(workspace.id, sharedFirst.job.id);
+    assert(
+      (await db.company.count({ where: { id: sharedFirst.job.companyId } })) === 1 &&
+        (await db.job.count({ where: { id: sharedSecond.job.id } })) === 1,
+      "公司仍有岗位时不得删除 Company 或级联删除其他岗位。",
+    );
+    await deleteJob(workspace.id, sharedSecond.job.id);
+    assert(
+      (await db.company.count({ where: { id: sharedFirst.job.companyId } })) === 0,
+      "删除共享公司的最后一个岗位后应清理 Company。",
+    );
 
     console.info("Job module tests passed:");
     console.info("- Workspace isolation");
@@ -102,6 +129,7 @@ async function run(): Promise<void> {
     console.info("- Atomic Job + APPLIED TimelineEvent creation");
     console.info("- Restricted edit fields");
     console.info("- Timeline count and cascade deletion");
+    console.info("- Empty Company cleanup without affecting sibling Jobs");
   } finally {
     await db.workspace.deleteMany({
       where: { id: { in: [workspace.id, otherWorkspace.id] } },

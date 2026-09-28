@@ -116,12 +116,12 @@ async function testDashboardModule(): Promise<void> {
 
     const data = await getWorkspaceScopedData(owner.id, workspace.id);
 
-    assert(data.metrics.companyCount === 4, "投递公司数量应使用 Company 数量。");
+    assert(data.metrics.companyCount === 3, "投递公司数量应只统计仍有岗位的 Company。");
     assert(data.metrics.jobCount === 3, "投递岗位数量应使用 Job 数量。");
     assert(data.metrics.interviewEntryCount === 2, "进入面试岗位数量统计错误。");
     assert(data.metrics.interviewEntryRate === 66.7, "面试进入率计算错误。");
     assert(data.metrics.offerCount === 1, "Offer 岗位数量统计错误。");
-    assert(data.metrics.offerCompanyConversionRate === 25, "Offer 公司转化率计算错误。");
+    assert(data.metrics.offerCompanyConversionRate === 33.3, "Offer 公司转化率计算错误。");
 
     assert(
       data.funnel.applied === 3 &&

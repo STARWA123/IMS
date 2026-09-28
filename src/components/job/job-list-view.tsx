@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { CompanyView } from "../company/company-view";
+import {
+  buildCompanyView,
+  searchCompanyView,
+} from "../../modules/company/company-view-model";
 import type { JobItem } from "../../modules/job/job-types";
 import { stageLabels } from "../../modules/job/recruitment-presentation";
 import type { WorkspaceScopedData } from "../../modules/workspace/workspace-types";
@@ -22,23 +27,33 @@ export function JobListView({
   data,
   workspaceId,
   workspaceName,
+  viewMode,
+  search,
+  expandedCompanyIds,
   onChanged,
   onOpenJob,
+  onViewModeChange,
+  onSearchChange,
+  onToggleCompany,
 }: {
   data: WorkspaceScopedData;
   workspaceId: string;
   workspaceName: string;
+  viewMode: "jobs" | "companies";
+  search: string;
+  expandedCompanyIds: ReadonlySet<string>;
   onChanged: () => void;
   onOpenJob: (jobId: string) => void;
+  onViewModeChange: (viewMode: "jobs" | "companies") => void;
+  onSearchChange: (search: string) => void;
+  onToggleCompany: (companyId: string) => void;
 }): ReactNode {
-  const [search, setSearch] = useState("");
   const [creating, setCreating] = useState(false);
   const [importing, setImporting] = useState(false);
   const [editingJob, setEditingJob] = useState<JobItem | null>(null);
   const [deletingJob, setDeletingJob] = useState<JobItem | null>(null);
 
   useEffect(() => {
-    setSearch("");
     setCreating(false);
     setImporting(false);
     setEditingJob(null);
@@ -57,24 +72,35 @@ export function JobListView({
     );
   }, [data.jobs, search]);
 
+  const companyCount = useMemo(
+    () => searchCompanyView(buildCompanyView(data.jobs), search).length,
+    [data.jobs, search],
+  );
+
+  const resultLabel = viewMode === "jobs"
+    ? search.trim() ? `${jobs.length} 个匹配岗位` : `${jobs.length} 个岗位`
+    : search.trim() ? `${companyCount} 个匹配公司` : `${companyCount} 个公司`;
+
   return (
     <>
       <section className="content-card jobs-table-card">
         <div className="jobs-toolbar">
           <div>
-            <span className="eyebrow">Jobs</span>
-            <h2>岗位列表</h2>
-            <span className="section-count">
-              {search.trim() ? `${jobs.length} 个匹配岗位` : `${jobs.length} 个岗位`}
-            </span>
+            <span className="eyebrow">Jobs & Companies</span>
+            <h2>{viewMode === "jobs" ? "岗位列表" : "公司视图"}</h2>
+            <span className="section-count">{resultLabel}</span>
           </div>
           <div className="jobs-toolbar-actions">
+            <div className="jobs-view-switch" aria-label="岗位展示方式" role="group">
+              <button aria-pressed={viewMode === "jobs"} onClick={() => onViewModeChange("jobs")} type="button">岗位</button>
+              <button aria-pressed={viewMode === "companies"} onClick={() => onViewModeChange("companies")} type="button">公司</button>
+            </div>
             <label className="job-search">
               <span aria-hidden="true">⌕</span>
               <input
-                aria-label="搜索岗位"
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="搜索公司、岗位或 Base"
+                aria-label={viewMode === "jobs" ? "搜索岗位" : "搜索公司或岗位"}
+                onChange={(event) => onSearchChange(event.target.value)}
+                placeholder={viewMode === "jobs" ? "搜索公司、岗位或 Base" : "搜索公司或岗位"}
                 type="search"
                 value={search}
               />
@@ -83,7 +109,17 @@ export function JobListView({
             <button className="primary-button add-job-button" onClick={() => setCreating(true)} type="button">＋ 新增岗位</button>
           </div>
         </div>
-        {jobs.length ? (
+        {viewMode === "companies" ? (
+          <CompanyView
+            expandedCompanyIds={expandedCompanyIds}
+            jobs={data.jobs}
+            onDeleteJob={setDeletingJob}
+            onEditJob={setEditingJob}
+            onOpenJob={onOpenJob}
+            onToggleCompany={onToggleCompany}
+            search={search}
+          />
+        ) : jobs.length ? (
           <div className="table-wrap">
             <table>
               <thead>

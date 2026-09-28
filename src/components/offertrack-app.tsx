@@ -14,6 +14,7 @@ import { WorkspaceSelector } from "./workspace/workspace-selector";
 import { useWorkspace } from "./workspace/workspace-provider";
 
 type View = "dashboard" | "kanban" | "jobs" | "settings" | "job-detail";
+type JobsViewMode = "jobs" | "companies";
 
 const navigationItems = [
   { id: "dashboard", label: "Dashboard" },
@@ -52,10 +53,16 @@ export function OfferTrackApp({ currentUser }: { currentUser: AuthUser }): React
   const [error, setError] = useState<string | null>(null);
   const [dataVersion, setDataVersion] = useState(0);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [detailReturnView, setDetailReturnView] = useState<Exclude<View, "job-detail">>("jobs");
+  const [jobsViewMode, setJobsViewMode] = useState<JobsViewMode>("jobs");
+  const [jobsSearch, setJobsSearch] = useState("");
+  const [expandedCompanyIds, setExpandedCompanyIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     setSelectedJobId(null);
     setView((currentView) => currentView === "job-detail" ? "jobs" : currentView);
+    setJobsSearch("");
+    setExpandedCompanyIds(new Set());
   }, [currentWorkspaceId]);
 
   useEffect(() => {
@@ -100,8 +107,21 @@ export function OfferTrackApp({ currentUser }: { currentUser: AuthUser }): React
   const visibleData = data?.workspaceId === currentWorkspaceId ? data : null;
 
   function openJob(jobId: string): void {
+    setDetailReturnView(view === "job-detail" ? "jobs" : view);
     setSelectedJobId(jobId);
     setView("job-detail");
+  }
+
+  function toggleCompany(companyId: string): void {
+    setExpandedCompanyIds((current) => {
+      const next = new Set(current);
+      if (next.has(companyId)) {
+        next.delete(companyId);
+      } else {
+        next.add(companyId);
+      }
+      return next;
+    });
   }
 
   function refreshData(): void {
@@ -167,10 +187,13 @@ export function OfferTrackApp({ currentUser }: { currentUser: AuthUser }): React
         ) : visibleData ? (
           view === "job-detail" && selectedJob ? (
             <JobDetailView
+              backLabel={detailReturnView === "kanban"
+                ? "返回看板"
+                : jobsViewMode === "companies" ? "返回公司视图" : "返回岗位列表"}
               job={selectedJob}
               onBack={() => {
                 setSelectedJobId(null);
-                setView("jobs");
+                setView(detailReturnView);
               }}
               onChanged={refreshData}
               workspaceId={currentWorkspaceId!}
@@ -185,8 +208,14 @@ export function OfferTrackApp({ currentUser }: { currentUser: AuthUser }): React
           ) : (
             <JobListView
               data={visibleData}
+              expandedCompanyIds={expandedCompanyIds}
               onChanged={refreshData}
               onOpenJob={openJob}
+              onSearchChange={setJobsSearch}
+              onToggleCompany={toggleCompany}
+              onViewModeChange={setJobsViewMode}
+              search={jobsSearch}
+              viewMode={jobsViewMode}
               workspaceId={currentWorkspaceId!}
               workspaceName={currentWorkspace!.name}
             />

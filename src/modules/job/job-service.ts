@@ -293,6 +293,7 @@ export async function deleteJob(
       where: { id: jobId, workspaceId },
       select: {
         id: true,
+        companyId: true,
         jobName: true,
         company: { select: { name: true } },
         _count: { select: { timelineEvents: true } },
@@ -309,6 +310,12 @@ export async function deleteJob(
       timelineEventCount: job._count.timelineEvents,
     };
     await transaction.job.delete({ where: { id: jobId } });
+    const remainingCompanyJobs = await transaction.job.count({
+      where: { companyId: job.companyId, workspaceId },
+    });
+    if (remainingCompanyJobs === 0) {
+      await transaction.company.delete({ where: { id: job.companyId } });
+    }
     return summary;
   });
 }

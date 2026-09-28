@@ -21,6 +21,7 @@
     "db:backup": "tsx scripts/create-local-backup.ts",
     "test:workspace": "tsx scripts/test-workspace-module.ts",
     "test:jobs": "tsx scripts/test-job-module.ts",
+    "test:company-view": "tsx scripts/test-company-view-module.ts",
     "test:kanban": "tsx scripts/test-kanban-module.ts",
     "test:timeline": "tsx scripts/test-timeline-module.ts",
     "test:dashboard": "tsx scripts/test-dashboard-module.ts",

@@ -227,7 +227,7 @@ export async function getWorkspaceScopedData(
   } satisfies Prisma.JobInclude;
 
   const [companyCount, jobs, recentActivity] = await Promise.all([
-    db.company.count({ where: { workspaceId } }),
+    db.company.count({ where: { workspaceId, jobs: { some: {} } } }),
     db.job.findMany({
       where: { workspaceId },
       include: jobInclude,
