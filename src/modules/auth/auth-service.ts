@@ -239,7 +239,7 @@ export async function bootstrapAdministrator(input: {
         passwordHash,
         role: "ADMIN",
         isActive: true,
-        mustChangePassword: false,
+        mustChangePassword: true,
       },
     });
     const assigned = await transaction.workspace.updateMany({
