@@ -138,6 +138,19 @@ docker compose exec offertrack npm run db:backup
 
 备份通过 SQLite Online Backup API 生成，避免数据库正在写入时直接 `cp` 导致快照不一致。建议每天定时执行，初期保留最近 30 份；本机备份无法应对云盘或整台服务器故障，稳定后必须增加另一台设备或对象存储的异地副本。
 
+仓库提供了 `deploy/backup-production.sh` 和对应的 systemd 单元。安装并启动定时器：
+
+```bash
+sudo install -m 644 deploy/systemd/offertrack-backup.service /etc/systemd/system/
+sudo install -m 644 deploy/systemd/offertrack-backup.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now offertrack-backup.timer
+sudo systemctl start offertrack-backup.service
+systemctl list-timers offertrack-backup.timer
+```
+
+定时器每天 03:15（服务器本地时间）执行，并随机延迟最多 15 分钟；脚本只清理生产备份目录中符合命名规则的旧文件，保留最新 30 份。
+
 ## 7. 发布与回滚
 
 日常开发在本机分支完成并运行类型检查、测试和生产构建。通过后合并到 `main`，服务器执行：

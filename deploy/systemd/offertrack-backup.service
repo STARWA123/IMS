@@ -1,0 +1,9 @@
+[Unit]
+Description=Create an OfferTrack SQLite backup
+Requires=docker.service
+After=docker.service
+ConditionPathExists=/opt/offertrack-prod/app/docker-compose.yml
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash /opt/offertrack-prod/app/deploy/backup-production.sh

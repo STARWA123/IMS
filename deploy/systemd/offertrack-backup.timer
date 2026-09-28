@@ -1,0 +1,11 @@
+[Unit]
+Description=Create a daily OfferTrack SQLite backup
+
+[Timer]
+OnCalendar=*-*-* 03:15:00
+Persistent=true
+RandomizedDelaySec=15m
+Unit=offertrack-backup.service
+
+[Install]
+WantedBy=timers.target
