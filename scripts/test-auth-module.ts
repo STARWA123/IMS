@@ -8,6 +8,7 @@ import {
   resetManagedUserPassword,
   setManagedUserActive,
 } from "../src/modules/auth/auth-service";
+import { validatePassword } from "../src/modules/auth/password-policy";
 import { listWorkspaces } from "../src/modules/workspace/workspace-service";
 
 function assert(condition: boolean, message: string): void {
@@ -34,11 +35,22 @@ async function testAuthModule(): Promise<void> {
   const marker = randomUUID().replaceAll("-", "").slice(0, 12);
   const firstUsername = `auth-${marker}`;
   const secondUsername = `auth2-${marker}`;
-  const initialPassword = "InitialPassword2026";
-  const resetPassword = "ResetPassword2026";
+  const initialPassword = "abc123";
+  const resetPassword = "xyz789";
   const createdUserIds: string[] = [];
 
   try {
+    validatePassword(initialPassword);
+    for (const invalidPassword of ["ab123", "abcdef", "123456"]) {
+      let rejected = false;
+      try {
+        validatePassword(invalidPassword);
+      } catch (error: unknown) {
+        rejected = error instanceof TypeError;
+      }
+      assert(rejected, `无效密码 ${invalidPassword} 未被拒绝。`);
+    }
+
     const first = await createManagedUser({
       username: firstUsername,
       displayName: "Auth Test One",
@@ -90,7 +102,7 @@ async function testAuthModule(): Promise<void> {
     await expectInvalidCredentials(firstUsername, resetPassword);
 
     console.info(
-      "Authentication verified: password hashing, login rejection, duplicate prevention, personal workspace isolation, password reset, and account disablement all passed.",
+      "Authentication verified: six-character password policy, password hashing, login rejection, duplicate prevention, personal workspace isolation, password reset, and account disablement all passed.",
     );
   } finally {
     await db.user.deleteMany({ where: { id: { in: createdUserIds } } });

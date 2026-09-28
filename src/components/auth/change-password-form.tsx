@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, type FormEvent, type ReactNode } from "react";
+import {
+  MINIMUM_PASSWORD_LENGTH,
+  PASSWORD_REQUIREMENT_TEXT,
+} from "../../modules/auth/password-policy";
 import { readApiError } from "../shared/api-client";
 
 export function ChangePasswordForm({ forced }: { forced: boolean }): ReactNode {
@@ -49,12 +53,12 @@ export function ChangePasswordForm({ forced }: { forced: boolean }): ReactNode {
       </label>
       <label>
         新密码
-        <input autoComplete="new-password" disabled={submitting} minLength={12} name="newPassword" required type="password" />
-        <small>至少 12 位，同时包含字母和数字。</small>
+        <input autoComplete="new-password" disabled={submitting} minLength={MINIMUM_PASSWORD_LENGTH} name="newPassword" required type="password" />
+        <small>{PASSWORD_REQUIREMENT_TEXT}</small>
       </label>
       <label>
         再次输入新密码
-        <input autoComplete="new-password" disabled={submitting} minLength={12} name="confirmation" required type="password" />
+        <input autoComplete="new-password" disabled={submitting} minLength={MINIMUM_PASSWORD_LENGTH} name="confirmation" required type="password" />
       </label>
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       <button className="primary-button auth-submit" disabled={submitting} type="submit">

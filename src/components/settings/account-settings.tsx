@@ -2,6 +2,10 @@
 
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import type { AuthUser, ManagedUser } from "../../modules/auth/auth-types";
+import {
+  MINIMUM_PASSWORD_LENGTH,
+  PASSWORD_REQUIREMENT_TEXT,
+} from "../../modules/auth/password-policy";
 import { readApiError } from "../shared/api-client";
 import { DialogShell } from "../shared/dialog-shell";
 
@@ -48,8 +52,8 @@ function ResetPasswordDialog({
       <form className="workspace-form" onSubmit={submit}>
         <label>
           临时密码
-          <input autoComplete="new-password" disabled={submitting} minLength={12} name="password" required type="password" />
-          <em>至少 12 位，同时包含字母和数字；用户下次登录时必须修改。</em>
+          <input autoComplete="new-password" disabled={submitting} minLength={MINIMUM_PASSWORD_LENGTH} name="password" required type="password" />
+          <em>{PASSWORD_REQUIREMENT_TEXT} 用户下次登录时必须修改。</em>
         </label>
         {error ? <p className="form-error" role="alert">{error}</p> : null}
         <div className="dialog-actions">
@@ -150,7 +154,7 @@ function AdminUserManagement({ currentUser }: { currentUser: AuthUser }): ReactN
       <form className="account-create-form" onSubmit={createUser}>
         <label>账号<input autoCapitalize="none" disabled={submitting} name="username" placeholder="例如 zhangsan" required /></label>
         <label>显示名称<input disabled={submitting} name="displayName" placeholder="例如 张三" required /></label>
-        <label>临时密码<input autoComplete="new-password" disabled={submitting} minLength={12} name="password" required type="password" /></label>
+        <label>临时密码<input autoComplete="new-password" disabled={submitting} minLength={MINIMUM_PASSWORD_LENGTH} name="password" required title={PASSWORD_REQUIREMENT_TEXT} type="password" /></label>
         <button className="primary-button" disabled={submitting} type="submit">{submitting ? "正在创建…" : "创建账号"}</button>
       </form>
 

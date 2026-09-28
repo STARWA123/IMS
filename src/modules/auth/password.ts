@@ -1,4 +1,7 @@
 import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+import { validatePassword } from "./password-policy";
+
+export { validatePassword } from "./password-policy";
 
 const keyLength = 64;
 const cost = 16_384;
@@ -22,18 +25,6 @@ function deriveKey(password: string, salt: Buffer): Promise<Buffer> {
       },
     );
   });
-}
-
-export function validatePassword(password: string): void {
-  if (password.length < 12) {
-    throw new TypeError("密码至少需要 12 个字符。");
-  }
-  if (password.length > 128) {
-    throw new TypeError("密码不能超过 128 个字符。");
-  }
-  if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
-    throw new TypeError("密码必须同时包含字母和数字。");
-  }
 }
 
 export async function hashPassword(password: string): Promise<string> {
