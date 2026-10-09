@@ -1,5 +1,6 @@
 import type { EventType, Prisma, Stage } from "../../generated/prisma/client";
 import { db } from "../../db/client";
+import { stageByTimelineEvent } from "../job/stage-rules";
 import type {
   WorkspaceDeletionSummary,
   WorkspaceItem,
@@ -157,11 +158,18 @@ type DurationTimelineEvent = {
   eventDate: Date;
 };
 
-function isStageIn(
-  stage: Stage,
+function hasReachedStage(
+  job: { stage: Stage; timelineEvents: { eventType: EventType }[] },
   stages: readonly Stage[],
 ): boolean {
-  return stages.includes(stage);
+  // Current stage or any saved completion event is sufficient, regardless of
+  // event date. Rejection and rollback must not erase genuine past progress.
+  return (
+    stages.includes(job.stage) ||
+    job.timelineEvents.some((event) =>
+      stages.includes(stageByTimelineEvent[event.eventType]),
+    )
+  );
 }
 
 function roundToOneDecimal(value: number): number {
@@ -250,12 +258,12 @@ export async function getWorkspaceScopedData(
   ]);
 
   const interviewEntryCount = jobs.filter((job) =>
-    isStageIn(job.stage, interviewStages),
+    hasReachedStage(job, interviewStages),
   ).length;
   const secondInterviewCount = jobs.filter((job) =>
-    isStageIn(job.stage, secondInterviewStages),
+    hasReachedStage(job, secondInterviewStages),
   ).length;
-  const offerJobs = jobs.filter((job) => job.stage === "OFFER");
+  const offerJobs = jobs.filter((job) => hasReachedStage(job, ["OFFER"]));
   const offerCompanyCount = new Set(offerJobs.map((job) => job.companyId)).size;
 
   return {
